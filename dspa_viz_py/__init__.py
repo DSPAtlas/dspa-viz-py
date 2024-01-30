@@ -1,1 +1,1 @@
-from barcode import BarcodePlotter
+from .barcode import BarcodePlotter

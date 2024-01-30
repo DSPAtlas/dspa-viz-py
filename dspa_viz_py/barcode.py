@@ -6,16 +6,16 @@ import matplotlib as mpl
 import seaborn as sns
 
 class BarcodePlotter:
-    def __init__(self, proteins_in_file_fasta_dict: dict, yeast_proteins: set):
+    def __init__(self, proteins_in_file_fasta_dict: dict, organism_proteins: set):
         """
         Initialize the BarcodePlotter.
 
         Parameters:
         - proteins_in_file_fasta_dict (dict): Dictionary mapping protein names to their sequences.
-        - yeast_proteins (set): Set of yeast protein names.
+        - organism_proteins (set): Set of organism protein names.
         """
         self.proteins_in_file_fasta_dict = proteins_in_file_fasta_dict
-        self.yeast_proteins = yeast_proteins
+        self.organism_proteins = organism_proteins
 
     def sort_dataframe_by_start(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -48,6 +48,7 @@ class BarcodePlotter:
         start: int,
         end: int,
         log2FC: float,
+        qvalue: float,
         qvalue_cutoff: float,
         log2FC_cutoff: float
     ) -> None:
@@ -142,14 +143,21 @@ class BarcodePlotter:
         Returns:
         - Union[str, plt.Figure]: Either the name of the saved SVG image or the plot itself.
         """
-        if prot in self.yeast_proteins:
+        if prot in self.organism_proteins:
             aa_seq = self.proteins_in_file_fasta_dict[prot].seq
             LiP_df = self.sort_dataframe_by_start(LiP_df[LiP_df.pg_protein_accessions == prot])
 
             dataframe_with_vector, len_vector = self.create_empty_matrices(aa_seq)
 
             for _, row in LiP_df.iterrows():
-                self.update_len_vector(len_vector, int(row['start']), int(row['end']), row['diff'], qvalue_cutoff, log2FC_cutoff)
+                 self.update_len_vector(len_vector=len_vector, 
+                    start=int(row['start']), 
+                    end=int(row['end']), 
+                    log2FC=row['diff'], 
+                    qvalue=row['adj_pval'],
+                    qvalue_cutoff=qvalue_cutoff, 
+                    log2FC_cutoff=log2FC_cutoff,
+                    )
 
             return self.plot_barcode(
                 prot,
@@ -182,14 +190,14 @@ class BarcodePlotter:
         Returns:
         - Union[str, plt.Figure]: Either the name of the saved SVG image or the plot itself.
         """
-        if prot in self.yeast_proteins:
+        if prot in self.organism_proteins:
             aa_seq = self.proteins_in_file_fasta_dict[prot].seq
             LiP_df = self.sort_dataframe_by_start(LiP_df[LiP_df.pg_protein_accessions == prot])
 
             dataframe_with_vector, len_vector = self.create_empty_matrices(aa_seq)
 
             for _, row in LiP_df.iterrows():
-                self.update_len_vector(len_vector, int(row['start']), int(row['end']), row['diff'], qvalue_cutoff, log2FC_cutoff)
+                self.update_len_vector(len_vector, int(row['start']), int(row['end']), row['diff'], row['adj_pval'], qvalue_cutoff, log2FC_cutoff)
 
             return self.plot_barcode(
                 prot,

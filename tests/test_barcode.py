@@ -13,9 +13,9 @@ class TestBarcodePlotter(unittest.TestCase):
             "protein1": MagicMock(seq="ABCDEFG"),
             "protein2": MagicMock(seq="HIJKLMN")
         }
-        self.yeast_proteins = {"protein1", "protein2"}
+        self.organism_proteins = {"protein1", "protein2"}
         self.plotter = BarcodePlotter(
-            self.proteins_in_file_fasta_dict, self.yeast_proteins
+            self.proteins_in_file_fasta_dict, self.organism_proteins
         )
 
     def test_sort_dataframe_by_start(self):
